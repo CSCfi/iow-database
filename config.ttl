@@ -1,0 +1,81 @@
+@prefix :        <#> .
+@prefix fuseki:  <http://jena.apache.org/fuseki#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
+@prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+
+
+[] rdf:type fuseki:Server ;
+   # Timeout - server-wide default: milliseconds.
+   # Format 1: "1000" -- 1 second timeout
+   # Format 2: "10000,60000" -- 10s timeout to first result, then 60s timeout to for rest of query.
+   # See java doc for ARQ.queryTimeout
+   # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "10000" ] ;
+   # ja:loadClass "your.code.Class" ;
+
+# Used services
+
+   fuseki:services (
+     <#core>
+     <#profile>
+	   <#user>
+   ) .
+
+
+ # Model service configuration
+
+<#core>  rdf:type fuseki:Service ;
+    fuseki:name                   "core" ;       # http://host:port/core
+    fuseki:dataset           <#core_dataset> ; # Public APIs
+    # Public
+    fuseki:serviceQuery           "sparql" ;     # http://host:port/core/sparql?query=...
+    fuseki:serviceReadGraphStore  "get" ;        # http://host:post/core/get?graph=default
+    # Protect these paths!
+    fuseki:serviceUpdate          "update" ;     # http://host:port/core/update?query=...
+    fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"   
+    .
+    
+<#core_dataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "CORE_TDB" ;
+    # Query timeout on this dataset (1s, 1000 milliseconds)
+    # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
+    .
+
+
+ # Profile service configuration
+
+<#profile>  rdf:type fuseki:Service ;
+    fuseki:name                   "profile" ;    # http://host:port/profile
+    fuseki:dataset <#profile_dataset> ;
+    # Public APIs
+    fuseki:serviceQuery           "sparql" ;     # http://host:port/profile/sparql?query=...
+    fuseki:serviceReadGraphStore  "get" ;        # http://host:post/profile/get?graph=default
+    # Protect these paths!
+    fuseki:serviceUpdate          "update" ;     # http://host:port/profile/update?query=...
+    fuseki:serviceUpload          "upload" ;     # http://host:post/profile/upload?graph="any"   
+    .
+
+<#profile_dataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "PROFILE_TDB" ;
+    # Query timeout on this dataset (1s, 1000 milliseconds)
+    # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
+    . 
+
+<#user>  rdf:type fuseki:Service ;
+    fuseki:name                   "users" ;    # http://host:port/profile
+    fuseki:dataset <#user_dataset> ;
+    # Public APIs
+    fuseki:serviceQuery           "sparql" ;     # http://host:port/profile/sparql?query=...
+    fuseki:serviceReadGraphStore  "get" ;        # http://host:post/profile/get?graph=default
+    # Protect these paths!
+    fuseki:serviceUpdate          "update" ;     # http://host:port/profile/update?query=...
+    fuseki:serviceUpload          "upload" ;     # http://host:post/profile/upload?graph="any"   
+    .
+
+<#user_dataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "USERS_TDB" ;
+    # Query timeout on this dataset (1s, 1000 milliseconds)
+    # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
+    . 
