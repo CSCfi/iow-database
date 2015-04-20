@@ -20,7 +20,8 @@
    fuseki:services (
      <#core>
      <#profile>
-	   <#user>
+     <#user>
+     <#search>
    ) .
 
 
@@ -82,3 +83,29 @@
     # Query timeout on this dataset (1s, 1000 milliseconds)
     # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
     . 
+    
+    
+############# UNION DATASET for global search #################
+
+<#modelGraph> rdf:type tdb:GraphTDB ;
+tdb:dataset <#core_dataset> .
+
+<#profileGraph> rdf:type tdb:GraphTDB ;
+tdb:dataset <#profile_dataset> .
+	
+<#search>  rdf:type fuseki:Service ;
+fuseki:name                   "search" ;    # http://host:port/profile
+fuseki:dataset <#union_dataset> ;
+# Public APIs
+fuseki:serviceQuery           "sparql" ;     # http://host:port/profile/sparql?query=...
+fuseki:serviceReadGraphStore  "get" ;        # http://host:post/profile/get?graph=default
+ .
+	
+<#union_dataset> rdf:type   ja:RDFDataset;
+ja:defaultGraph <#union_model> .
+								
+<#union_model> rdf:type         ja:UnionModel;
+  ja:rootModel                  <#modelGraph>;
+  ja:subModel                   <#profileGraph>;
+.
+
