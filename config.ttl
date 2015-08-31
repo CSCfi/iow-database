@@ -41,6 +41,7 @@
     
 <#core_dataset> rdf:type tdb:DatasetTDB ;
     tdb:location "CORE_TDB" ;
+    tdb:unionDefaultGraph   true ;
     # Query timeout on this dataset (1s, 1000 milliseconds)
     # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
     .
