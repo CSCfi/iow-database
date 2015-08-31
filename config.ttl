@@ -1,10 +1,10 @@
 @prefix :        <#> .
 @prefix fuseki:  <http://jena.apache.org/fuseki#> .
 @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
 @prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix text:    <http://jena.apache.org/text#> .
 
 
 [] rdf:type fuseki:Server ;
@@ -14,22 +14,26 @@
    # See java doc for ARQ.queryTimeout
    # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "10000" ] ;
    # ja:loadClass "your.code.Class" ;
-
-# Used services
-
    fuseki:services (
      <#core>
-     <#profile>
      <#user>
-     <#search>
    ) .
 
+# TDB
+[] ja:loadClass "com.hp.hpl.jena.tdb.TDB" .
+tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
+tdb:GraphTDB    rdfs:subClassOf  ja:Model .
 
- # Model service configuration
+# Text
+[] ja:loadClass "org.apache.jena.query.text.TextQuery" .
+text:TextDataset      rdfs:subClassOf   ja:RDFDataset .
+text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
+
+ # Core service configuration
 
 <#core>  rdf:type fuseki:Service ;
     fuseki:name                   "core" ;       # http://host:port/core
-    fuseki:dataset           <#core_dataset> ; # Public APIs
+    fuseki:dataset           <#search_dataset> ; # Public APIs
     # Public
     fuseki:serviceQuery           "sparql" ;     # http://host:port/core/sparql?query=...
     fuseki:serviceReadGraphStore  "get" ;        # http://host:post/core/get?graph=default
@@ -37,6 +41,13 @@
     fuseki:serviceReadWriteGraphStore    "data" ; # http://host:port/core/data?query=...
     fuseki:serviceUpdate          "update" ;     # http://host:port/core/update?query=...
     fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"   
+    .
+	
+ # Searchable dataset  
+
+ <#search_dataset> rdf:type     text:TextDataset ;
+    text:dataset   <#core_dataset> ;
+    text:index     <#indexLucene> ;
     .
     
 <#core_dataset> rdf:type tdb:DatasetTDB ;
@@ -46,29 +57,8 @@
     # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
     .
 
-
- # Profile service configuration
-
-<#profile>  rdf:type fuseki:Service ;
-    fuseki:name                   "profile" ;    # http://host:port/profile
-    fuseki:dataset <#profile_dataset> ;
-    # Public APIs
-    fuseki:serviceQuery           "sparql" ;     # http://host:port/profile/sparql?query=...
-    fuseki:serviceReadGraphStore  "get" ;        # http://host:post/profile/get?graph=default
-    # Protect these paths!
-    fuseki:serviceReadWriteGraphStore    "data" ; # http://host:port/core/data?query=...
-    fuseki:serviceUpdate          "update" ;     # http://host:port/profile/update?query=...
-    fuseki:serviceUpload          "upload" ;     # http://host:post/profile/upload?graph="any"   
-    .
-
-<#profile_dataset> rdf:type tdb:DatasetTDB ;
-    tdb:location "PROFILE_TDB" ;
-    # Query timeout on this dataset (1s, 1000 milliseconds)
-    # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
-    . 
-
 <#user>  rdf:type fuseki:Service ;
-    fuseki:name                   "users" ;    # http://host:port/profile
+    fuseki:name                   "users" ;    # http://host:port/users
     fuseki:dataset <#user_dataset> ;
     # Public APIs
     fuseki:serviceQuery           "sparql" ;     # http://host:port/profile/sparql?query=...
@@ -84,29 +74,30 @@
     # Query timeout on this dataset (1s, 1000 milliseconds)
     # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
     . 
-    
-    
-############# UNION DATASET for global search #################
-
-<#modelGraph> rdf:type tdb:GraphTDB ;
-tdb:dataset <#core_dataset> .
-
-<#profileGraph> rdf:type tdb:GraphTDB ;
-tdb:dataset <#profile_dataset> .
 	
-<#search>  rdf:type fuseki:Service ;
-fuseki:name                   "search" ;    # http://host:port/profile
-fuseki:dataset <#union_dataset> ;
-# Public APIs
-fuseki:serviceQuery           "sparql" ;     # http://host:port/profile/sparql?query=...
-fuseki:serviceReadGraphStore  "get" ;        # http://host:post/profile/get?graph=default
- .
-	
-<#union_dataset> rdf:type   ja:RDFDataset;
-ja:defaultGraph <#union_model> .
-								
-<#union_model> rdf:type         ja:UnionModel;
-  ja:rootModel                  <#modelGraph>;
-  ja:subModel                   <#profileGraph>;
-.
+# Text index description
+<#indexLucene> a text:TextIndexLucene ;
+    text:directory <file:Lucene> ;
+    ##text:directory "mem" ;
+	##text:storeValues true;  
+    text:entityMap <#entMap> ;
+    .
 
+# Mapping in the index
+# URI stored in field "uri"
+# rdfs:label is mapped to field "text"
+<#entMap> a text:EntityMap ;
+    text:entityField      "uri" ;
+    text:graphField       "graph" ; ## enable graph-specific indexing
+    text:defaultField     "label" ; ## Must be defined in the text:map
+	#text:uidField         "uid" ;   
+    text:map (
+         # rdfs:label
+         [ text:field "label" ;
+           text:predicate rdfs:label ;
+           text:analyzer [ a text:LowerCaseKeywordAnalyzer ] ]
+         # rdfs:comment
+         [ text:field "comment" ;
+           text:predicate rdfs:comment ;
+           text:analyzer [ a text:LowerCaseKeywordAnalyzer ] ]
+         ) .
