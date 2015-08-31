@@ -90,7 +90,7 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
     text:entityField      "uri" ;
     text:graphField       "graph" ; ## enable graph-specific indexing
     text:defaultField     "label" ; ## Must be defined in the text:map
-	#text:uidField         "uid" ;   
+    text:uidField         "uid" ;   
     text:map (
          # rdfs:label
          [ text:field "label" ;
