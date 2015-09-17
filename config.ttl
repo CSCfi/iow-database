@@ -17,6 +17,7 @@
    fuseki:services (
      <#core>
      <#user>
+	<#search>
    ) .
 
 # TDB
@@ -33,7 +34,7 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
 
 <#core>  rdf:type fuseki:Service ;
     fuseki:name                   "core" ;       # http://host:port/core
-    fuseki:dataset           <#search_dataset> ; # Public APIs
+    fuseki:dataset           <#core_dataset> ; # Public APIs
     # Public
     fuseki:serviceQuery           "sparql" ;     # http://host:port/core/sparql?query=...
     fuseki:serviceReadGraphStore  "get" ;        # http://host:post/core/get?graph=default
@@ -42,6 +43,12 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
     fuseki:serviceUpdate          "update" ;     # http://host:port/core/update?query=...
     fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"   
     .
+	
+<#search>  rdf:type fuseki:Service ;
+    fuseki:name                   "search" ;       # http://host:port/search
+    fuseki:dataset           <#search_dataset> ; 
+    fuseki:serviceQuery           "sparql" ;     # http://host:port/search/sparql?query=...
+	.
 	
  # Searchable dataset  
 
@@ -79,7 +86,7 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
 <#indexLucene> a text:TextIndexLucene ;
     text:directory <file:Lucene> ;
     ##text:directory "mem" ;
-	##text:storeValues true;  
+    ##text:storeValues true;  
     text:entityMap <#entMap> ;
     .
 
@@ -90,7 +97,7 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
     text:entityField      "uri" ;
     text:graphField       "graph" ; ## enable graph-specific indexing
     text:defaultField     "label" ; ## Must be defined in the text:map
-    text:uidField         "uid" ;   
+	#text:uidField         "uid" ;   
     text:map (
          # rdfs:label
          [ text:field "label" ;
