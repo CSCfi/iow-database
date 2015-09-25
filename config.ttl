@@ -38,16 +38,15 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
     # Public
     fuseki:serviceQuery           "sparql" ;     # http://host:port/core/sparql?query=...
     fuseki:serviceReadGraphStore  "get" ;        # http://host:post/core/get?graph=default
-    # Protect these paths!
-    fuseki:serviceReadWriteGraphStore    "data" ; # http://host:port/core/data?query=...
-    fuseki:serviceUpdate          "update" ;     # http://host:port/core/update?query=...
-    fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"   
     .
 	
 <#search>  rdf:type fuseki:Service ;
     fuseki:name                   "search" ;       # http://host:port/search
     fuseki:dataset           <#search_dataset> ; 
     fuseki:serviceQuery           "sparql" ;     # http://host:port/search/sparql?query=...
+    fuseki:serviceUpdate          "update" ;     # http://host:port/core/update?query=...
+	fuseki:serviceReadWriteGraphStore    "data" ; # http://host:port/core/data?query=...
+    fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"  
 	.
 	
  # Searchable dataset  
@@ -86,7 +85,7 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
 <#indexLucene> a text:TextIndexLucene ;
     text:directory <file:Lucene> ;
     ##text:directory "mem" ;
-    ##text:storeValues true;  
+	##text:storeValues true;  
     text:entityMap <#entMap> ;
     .
 
