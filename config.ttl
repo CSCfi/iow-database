@@ -4,7 +4,6 @@
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix tdb:     <http://jena.hpl.hp.com/2008/tdb#> .
 @prefix ja:      <http://jena.hpl.hp.com/2005/11/Assembler#> .
-@prefix text:    <http://jena.apache.org/text#> .
 
 
 [] rdf:type fuseki:Server ;
@@ -17,7 +16,6 @@
    fuseki:services (
      <#core>
      <#user>
-	<#search>
    ) .
 
 # TDB
@@ -25,37 +23,19 @@
 tdb:DatasetTDB  rdfs:subClassOf  ja:RDFDataset .
 tdb:GraphTDB    rdfs:subClassOf  ja:Model .
 
-# Text
-[] ja:loadClass "org.apache.jena.query.text.TextQuery" .
-text:TextDataset      rdfs:subClassOf   ja:RDFDataset .
-text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
 
  # Core service configuration
 
 <#core>  rdf:type fuseki:Service ;
-    fuseki:name                   "core" ;       # http://host:port/core
-    fuseki:dataset           <#core_dataset> ; # Public APIs
-    # Public
-    fuseki:serviceQuery           "sparql" ;     # http://host:port/core/sparql?query=...
-    fuseki:serviceReadGraphStore  "get" ;        # http://host:post/core/get?graph=default
-    .
-	
-<#search>  rdf:type fuseki:Service ;
-    fuseki:name                   "search" ;       # http://host:port/search
-    fuseki:dataset           <#search_dataset> ; 
+    fuseki:name                   "core" ;       # http://host:port/search
+    fuseki:dataset           <#core_dataset> ; 
     fuseki:serviceQuery           "sparql" ;     # http://host:port/search/sparql?query=...
     fuseki:serviceUpdate          "update" ;     # http://host:port/core/update?query=...
 	fuseki:serviceReadWriteGraphStore    "data" ; # http://host:port/core/data?query=...
-    fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"  
+    fuseki:serviceUpload          "upload" ;     # http://host:post/core/upload?graph="any"
+	fuseki:serviceReadGraphStore  "get" ;        # http://host:post/core/get?graph=default
 	.
 	
- # Searchable dataset  
-
- <#search_dataset> rdf:type     text:TextDataset ;
-    text:dataset   <#core_dataset> ;
-    text:index     <#indexLucene> ;
-    .
-    
 <#core_dataset> rdf:type tdb:DatasetTDB ;
     tdb:location "CORE_TDB" ;
     tdb:unionDefaultGraph   true ;
@@ -81,29 +61,3 @@ text:TextIndexLucene  rdfs:subClassOf   text:TextIndex .
     # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
     . 
 	
-# Text index description
-<#indexLucene> a text:TextIndexLucene ;
-    text:directory <file:Lucene> ;
-    ##text:directory "mem" ;
-	##text:storeValues true;  
-    text:entityMap <#entMap> ;
-    .
-
-# Mapping in the index
-# URI stored in field "uri"
-# rdfs:label is mapped to field "text"
-<#entMap> a text:EntityMap ;
-    text:entityField      "uri" ;
-    text:graphField       "graph" ; ## enable graph-specific indexing
-    text:defaultField     "label" ; ## Must be defined in the text:map
-	#text:uidField         "uid" ;   
-    text:map (
-         # rdfs:label
-         [ text:field "label" ;
-           text:predicate rdfs:label ;
-           text:analyzer [ a text:LowerCaseKeywordAnalyzer ] ]
-         # rdfs:comment
-         [ text:field "comment" ;
-           text:predicate rdfs:comment ;
-           text:analyzer [ a text:LowerCaseKeywordAnalyzer ] ]
-         ) .
