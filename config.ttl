@@ -65,7 +65,7 @@ tdb:GraphTDB    rdfs:subClassOf  ja:Model .
 
  # Concept service configuration
 
-<#concept>  rdf:type fuseki:Service ;
+<#concepts>  rdf:type fuseki:Service ;
     fuseki:name                   "concept" ;       # http://host:port/search
     fuseki:dataset           <#concept_dataset> ; 
     fuseki:serviceQuery           "sparql" ;     # http://host:port/search/sparql?query=...
