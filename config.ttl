@@ -17,7 +17,8 @@
      <#core>
      <#user>
      <#concepts>
-	 <#imports>
+     <#imports>
+     <#prov>
    ) .
 
 # TDB
@@ -98,6 +99,25 @@ tdb:GraphTDB    rdfs:subClassOf  ja:Model .
 	
 <#imports_dataset> rdf:type tdb:DatasetTDB ;
     tdb:location "IMPORTS_TDB" ;
+    tdb:unionDefaultGraph   true ;
+    # Query timeout on this dataset (1s, 1000 milliseconds)
+    # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
+    .
+    
+    # prov service configuration
+
+<#prov>  rdf:type fuseki:Service ;
+    fuseki:name                   "prov" ;       # http://host:port/search
+    fuseki:dataset           <#prov_dataset> ; 
+    fuseki:serviceQuery           "sparql" ;     # http://host:port/prov/sparql?query=...
+    fuseki:serviceUpdate          "update" ;     # http://host:port/prov/update?query=...
+	fuseki:serviceReadWriteGraphStore    "data" ; # http://host:port/prov/data?query=...
+    fuseki:serviceUpload          "upload" ;     # http://host:post/prov/upload?graph="any"
+	fuseki:serviceReadGraphStore  "get" ;        # http://host:post/prov/get?graph=default
+	.
+	
+<#prov_dataset> rdf:type tdb:DatasetTDB ;
+    tdb:location "PROV_TDB" ;
     tdb:unionDefaultGraph   true ;
     # Query timeout on this dataset (1s, 1000 milliseconds)
     # ja:context [ ja:cxtName "arq:queryTimeout" ;  ja:cxtValue "1000" ] ;
